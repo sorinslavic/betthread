@@ -42,8 +42,12 @@ public class Session {
 		return this.expirationDate >= System.currentTimeMillis();
 	}
 	
-	public static final int getIdFromKey(String key) {
-		return Integer.parseInt(key, 16);
+	public static final int getIdFromKey(String key) throws InvalidSessionKeyException {
+		try {
+			return Integer.parseInt(key, 16);
+		} catch (Exception e) {
+			throw new InvalidSessionKeyException("Key " + key + " could not be parsed to a valid session id", e);
+		}
 	}
 	
 	public static final String getKeyFromId(int id) {

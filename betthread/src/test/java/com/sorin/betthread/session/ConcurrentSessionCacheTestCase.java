@@ -9,10 +9,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class SessionCacheTestCase {
+public class ConcurrentSessionCacheTestCase {
 	// must be HEX int representation 
 	private static final String SESSION_KEY = "123ABC";
 	private static final int CUSTOMER_ID = 123;
@@ -47,37 +48,43 @@ public class SessionCacheTestCase {
 		}
 	};
 	
-	private SessionCache cache;
+	private ConcurrentSessionCache cache;
 	
 	@Before
 	public void setup() {
-		cache = new SessionCache();
+		cache = ConcurrentSessionCache.getInstance();
+	}
+	
+	@After
+	public void cleanUp() {
+		// FIXME - this method was added to simply allow these tests :(
+		cache.clear();
 	}
 	
 	@Test
-	public void testGetSessionEmtpy() {
+	public void testGetSessionEmtpy() throws Exception {
 		assertNull(cache.getSession(SESSION_KEY));
 	}
 	
 	@Test
-	public void testCreateSession() {
+	public void testCreateSession() throws Exception {
 		createSessionWithId(singleIdGenerator, SINGLE_SESSION_ID);
 	}
 
 	@Test
-	public void testCreateSessionDuplicateSessionId() {
+	public void testCreateSessionDuplicateSessionId() throws Exception {
 		createSessionWithId(duplicateIdGenerator, SINGLE_SESSION_ID);
 		// init the previous test state ... kind of makes the other create session test redundant
 		createSessionWithId(duplicateIdGenerator, DUPLICATE_SESSION_ID);		
 	}
 	
 	@Test(expected = NullPointerException.class)
-	public void testExceptionFromDuplicateSessionId() {
+	public void testExceptionFromDuplicateSessionId() throws Exception {
 		createSessionWithId(errorIdGenerator, SINGLE_SESSION_ID);
 		createSessionWithId(errorIdGenerator, SINGLE_SESSION_ID);		
 	}
 	
-	private void createSessionWithId(SessionIdGenerator generator, int id) {
+	private void createSessionWithId(SessionIdGenerator generator, int id) throws InvalidSessionKeyException {
 		Session session = cache.createSession(generator, CUSTOMER_ID);
 		
 		assertEquals(id, session.getSessionId());

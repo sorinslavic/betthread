@@ -70,8 +70,7 @@ public class MockHttpExchange extends HttpExchange {
 	
 	@Override
 	public int getResponseCode() {
-		// TODO Auto-generated method stub
-		return 0;
+		return actualStatusCode;
 	}
 	
 	@Override

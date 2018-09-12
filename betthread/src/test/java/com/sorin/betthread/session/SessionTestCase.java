@@ -20,7 +20,7 @@ public class SessionTestCase {
 	}
 	
 	@Test
-	public void validateSessionKeyToIdTransform() {
+	public void validateSessionKeyToIdTransform() throws InvalidSessionKeyException {
 		assertEquals(1, Session.getIdFromKey("1"));
 		assertEquals(10, Session.getIdFromKey("A"));
 		assertEquals(15, Session.getIdFromKey("F"));

@@ -5,6 +5,8 @@ import java.nio.charset.Charset;
 import java.util.concurrent.Executors;
 
 import com.sorin.betthread.handler.DispatchHandler;
+import com.sorin.betthread.repository.InMemoryBetRepository;
+import com.sorin.betthread.session.ConcurrentSessionCache;
 import com.sun.net.httpserver.HttpServer;
 
 public class BetThreadApp {
@@ -18,7 +20,7 @@ public class BetThreadApp {
 		
 		server.setExecutor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
 		
-		server.createContext("/", new DispatchHandler());
+		server.createContext("/", new DispatchHandler(ConcurrentSessionCache.getInstance(), InMemoryBetRepository.getInstance()));
 		
 		server.start();
 	}
