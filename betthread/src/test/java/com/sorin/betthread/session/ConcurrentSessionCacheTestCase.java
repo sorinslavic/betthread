@@ -18,32 +18,32 @@ public class ConcurrentSessionCacheTestCase {
 	private static final String SESSION_KEY = "123ABC";
 	private static final int CUSTOMER_ID = 123;
 	
-	private static final int SINGLE_SESSION_ID = 17;
-	private static final int DUPLICATE_SESSION_ID = 999;
+	private static final long SINGLE_SESSION_ID = 17;
+	private static final long DUPLICATE_SESSION_ID = 999;
 	
 	// mocks without a mocking framework
 	private SessionIdGenerator singleIdGenerator = new SessionIdGenerator() {
 		@Override
-		public int getNewSessionId() {
+		public long getNewSessionId() {
 			return SINGLE_SESSION_ID;
 		}
 	};
 	
 	private SessionIdGenerator duplicateIdGenerator = new SessionIdGenerator() {
-		private Queue<Integer> queue = new LinkedList<>(Arrays.asList(SINGLE_SESSION_ID, SINGLE_SESSION_ID, SINGLE_SESSION_ID, DUPLICATE_SESSION_ID));
+		private Queue<Long> queue = new LinkedList<>(Arrays.asList(SINGLE_SESSION_ID, SINGLE_SESSION_ID, SINGLE_SESSION_ID, DUPLICATE_SESSION_ID));
 		
 		@Override
-		public int getNewSessionId() {
+		public long getNewSessionId() {
 			return queue.poll();
 		}
 	};
 
 	private SessionIdGenerator errorIdGenerator = new SessionIdGenerator() {
-		private Queue<Integer> queue = new LinkedList<>(Arrays.asList(SINGLE_SESSION_ID, SINGLE_SESSION_ID));
+		private Queue<Long> queue = new LinkedList<>(Arrays.asList(SINGLE_SESSION_ID, SINGLE_SESSION_ID));
 		
 		// this will error out because when the queue is emptied it will return null that cannot be autounbox into int
 		@Override
-		public int getNewSessionId() {
+		public long getNewSessionId() {
 			return queue.poll();
 		}
 	};
@@ -84,7 +84,7 @@ public class ConcurrentSessionCacheTestCase {
 		createSessionWithId(errorIdGenerator, SINGLE_SESSION_ID);		
 	}
 	
-	private void createSessionWithId(SessionIdGenerator generator, int id) throws InvalidSessionKeyException {
+	private void createSessionWithId(SessionIdGenerator generator, long id) throws InvalidSessionKeyException {
 		Session session = cache.createSession(generator, CUSTOMER_ID);
 		
 		assertEquals(id, session.getSessionId());

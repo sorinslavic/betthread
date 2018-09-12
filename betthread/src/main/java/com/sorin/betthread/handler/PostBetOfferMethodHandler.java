@@ -6,12 +6,14 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 
 import com.sorin.betthread.BetThreadApp;
+import com.sorin.betthread.Log;
 import com.sorin.betthread.repository.BetRepository;
 import com.sorin.betthread.session.InvalidSessionKeyException;
 import com.sorin.betthread.session.Session;
 import com.sorin.betthread.session.SessionCache;
 
 public class PostBetOfferMethodHandler {
+	private static final Log log = new Log(PostBetOfferMethodHandler.class);
 
 	private final SessionCache sessionCache;
 	private final BetRepository betRepo;
@@ -22,17 +24,15 @@ public class PostBetOfferMethodHandler {
 		this.betRepo = betRepo;
 	}
 	
-	public void perform(String path, String query, InputStream requestBody) throws HttpStatusCodeException, IOException {
+	public void perform(String path, String query, InputStream requestBody) throws HttpStatusCodeException, IOException {		
 		// handle paths of pattern: /<betofferid>/stake
 		// query should be ?sessionkey=<sessionkey>
-		
-		if (! path.endsWith("stake")) {
-			throw new HttpStatusCodeException(HttpURLConnection.HTTP_NOT_FOUND, "Path: " + path + " is not a known endpoint.");
-		}
 		int betOfferId = Integer.valueOf(PathUtil.getFirstPartOfPath(path));
 		
 		Session session = getSession(query);		
 		int customerId = session.getCustomerId();
+
+		log.debug("perform - add new stake for customerId: " + customerId + " on betOfferId: " + betOfferId);
 		
 		InputStreamReader reader = new InputStreamReader(requestBody, BetThreadApp.CHARSET);
 		StringBuilder sb = new StringBuilder();
@@ -46,8 +46,10 @@ public class PostBetOfferMethodHandler {
 		betRepo.placeStake(stake, customerId, betOfferId);
 	}
 
-	private Session getSession(String query) throws HttpStatusCodeException{
+	private Session getSession(String query) throws HttpStatusCodeException {		
 		String sessionKey = PathUtil.getParameterValue(query, "sessionkey");
+		log.debug("getSession - verify session for key: " + sessionKey);
+		
 		Session session;
 		try {
 			session = sessionCache.getSession(sessionKey);

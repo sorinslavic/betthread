@@ -31,10 +31,10 @@ public class SessionIdGenerator {
 	}
 	
 	/**
-	 * Generate a session id that is basically a random int number - uniformly distributed between 0 and {@link Integer#MAX_VALUE}.
+	 * Generate a session id that is basically a random long number - uniformly distributed between 0 and {@link Long#MAX_VALUE}.
 	 * @return a "new" session id
 	 */
-	public int getNewSessionId() {
-		return random.nextInt();
+	public long getNewSessionId() {
+		return random.nextLong(Long.MAX_VALUE);
 	}
 }

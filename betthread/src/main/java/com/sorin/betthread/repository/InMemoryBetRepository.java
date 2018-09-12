@@ -8,12 +8,15 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.sorin.betthread.Log;
+import com.sorin.betthread.handler.DispatchHandler;
+
 public class InMemoryBetRepository implements BetRepository {
+	private static final Log log = new Log(InMemoryBetRepository.class);
+	
 	private static final InMemoryBetRepository instance = new InMemoryBetRepository();
 	
-	private static final Comparator<CustomerStake> stakeComparator = (cs1, cs2) -> {
-		return cs1.getStake() - cs2.getStake();
-	};
+	private static final Comparator<CustomerStake> REVERSED_STAKE_COMPARATOR = Comparator.reverseOrder();
 	
 	private final Map<Integer, SortedSet<CustomerStake>> betOfferData;
 		
@@ -26,20 +29,22 @@ public class InMemoryBetRepository implements BetRepository {
 	}
 
 	@Override
-	public void placeStake(int stake, int customerId, int betOfferId) {
+	public void placeStake(int stake, int customerId, int betOfferId) {		
 		// per ConcurrentHashMap implementation #compute is performed atomically
 		betOfferData.compute(betOfferId, 
 				(key, set) -> {
 					if (set == null) {
-						SortedSet<CustomerStake> stakes = new TreeSet<>(stakeComparator);
+						SortedSet<CustomerStake> stakes = new TreeSet<>(REVERSED_STAKE_COMPARATOR);
 						CustomerStake cs = new CustomerStake(customerId, stake);
 						stakes.add(cs);
 						return Collections.synchronizedSortedSet(stakes);
 					} else {
-						Optional<CustomerStake> existingCs = set.stream().filter(cs -> cs.getCustomerId() == customerId).findAny();
-						if (existingCs.isPresent()) {
-							if (existingCs.get().getStake() < stake) {
-								existingCs.get().setStake(stake);
+						Optional<CustomerStake> optionalCs = set.stream().filter(cs -> cs.getCustomerId() == customerId).findAny();
+						if (optionalCs.isPresent()) {
+							CustomerStake existingCs = optionalCs.get();
+							if (existingCs.getStake() < stake) {
+								set.remove(existingCs);
+								set.add(new CustomerStake(customerId, stake));
 							}
 						} else {
 							CustomerStake cs = new CustomerStake(customerId, stake);
@@ -56,6 +61,7 @@ public class InMemoryBetRepository implements BetRepository {
 
 	@Override
 	public void clear() {
+		log.info("clear - clearing bet repository data");
 		betOfferData.clear();
 	}
 }

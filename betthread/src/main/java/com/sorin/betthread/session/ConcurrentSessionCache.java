@@ -4,12 +4,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sorin.betthread.BetThreadApp;
+import com.sorin.betthread.Log;
 
 // TODO - keep 2 maps - one with active one with inactive
 public class ConcurrentSessionCache implements SessionCache {
+	private static final Log log = new Log(ConcurrentSessionCache.class);
+	
 	private static final ConcurrentSessionCache instance = new ConcurrentSessionCache();
 	
-	private final Map<Integer, Session> sessionMap;
+	private final Map<Long, Session> sessionMap;
 	
 	private ConcurrentSessionCache() {
 		this.sessionMap = new ConcurrentHashMap<>();
@@ -21,7 +24,7 @@ public class ConcurrentSessionCache implements SessionCache {
 
 	@Override
 	public Session createSession(SessionIdGenerator generator, int customerId) {
-		int sessionId = generator.getNewSessionId();
+		long sessionId = generator.getNewSessionId();
 		Session session = new Session(sessionId, customerId, BetThreadApp.SESSION_TIMEOUT_MILIS);
 		
 		// FIXME - validate session is unique
@@ -39,6 +42,7 @@ public class ConcurrentSessionCache implements SessionCache {
 
 	@Override
 	public void clear() {
+		log.info("clear - clearing bet repository data");
 		sessionMap.clear();
 	}
 }

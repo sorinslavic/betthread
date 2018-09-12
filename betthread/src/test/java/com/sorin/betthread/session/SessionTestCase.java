@@ -6,8 +6,11 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.sorin.betthread.Log;
+
 
 public class SessionTestCase {
+	private static final Log log = new Log(SessionTestCase.class);
 	
 	@Test
 	public void validateSessionIdToKeyTransform() {
@@ -37,6 +40,7 @@ public class SessionTestCase {
 	
 	@Test
 	public void validateExpirationUpdate() throws InterruptedException {
+		log.debug("validateExpirationUpdate - test will sleep in order for session to expire");
 		Session session = new Session(1, 123, 500);
 		Thread.sleep(600); // ugh 
 		

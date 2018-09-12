@@ -1,25 +1,37 @@
 package com.sorin.betthread.repository;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class MockBetRepository implements BetRepository {
 
+	private SortedSet<CustomerStake> stakes = new TreeSet<>();
+	private List<Integer> capturedBetOfferIds = new ArrayList<>();
+	
 	@Override
 	public void placeStake(int stake, int customerId, int betOfferId) {
-		// TODO Auto-generated method stub
-		
+		// nope
 	}
 
 	@Override
 	public SortedSet<CustomerStake> getBetOfferIdTopStakes(int betOfferId) {
-		// TODO Auto-generated method stub
-		return null;
+		capturedBetOfferIds.add(betOfferId);
+		return stakes;
 	}
 
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
-		
+		// no need
+	}
+	
+	public void initStakes(SortedSet<CustomerStake> stakes) {
+		this.stakes = stakes;
+	}
+	
+	public List<Integer> getCapturedBetOfferIds() {
+		return capturedBetOfferIds;
 	}
 
 }

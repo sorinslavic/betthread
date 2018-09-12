@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 
+import com.sorin.betthread.Log;
 import com.sorin.betthread.repository.BetRepository;
 import com.sorin.betthread.session.SessionCache;
 import com.sorin.betthread.session.SessionIdGenerator;
@@ -17,6 +18,8 @@ import com.sun.net.httpserver.HttpHandler;
  *
  */
 public class DispatchHandler implements HttpHandler {
+	private static final Log log = new Log(DispatchHandler.class);
+	
 	private final SessionCache sessionCache;
 	private final BetRepository betRepo;
 	
@@ -31,36 +34,59 @@ public class DispatchHandler implements HttpHandler {
 		// called each time on a separate thread
 		// the SessionIdGenerator is "thread dependent"
 		
-		
 		try (InputStream is = exchange.getRequestBody();
 				OutputStream os = exchange.getResponseBody()) {
 			
 			try {
 				String method = exchange.getRequestMethod();
+				String path = exchange.getRequestURI().getPath();
+				
+				log.info("handle - dispatch exchange: " + method + " " + path);
 				
 				if ("GET".equals(method)) {
-					// because of how the SessionIdGenerator is implemented we are "forced" to create a new one 
-					// for each exchange - because the SessionIdGenerator needs to be created on the thread it is used
-					// because of the ThreadLocal optimization
-					GetMethodHandler getHandler = new GetMethodHandler(sessionCache, new SessionIdGenerator());
-					writeResponse(exchange, getHandler.perform(exchange.getRequestURI().getPath()));
+					// the path is of format: 
+					// /<customerid>/session 
+					// /<betofferid>/highstakes
+
+					if (path.endsWith("session")) {
+						// because of how the SessionIdGenerator is implemented we are "forced" to create a new one 
+						// for each exchange - because the SessionIdGenerator needs to be created on the thread it is used
+						// because of the ThreadLocal optimization
+						GetSessionMethodHandler getHandler = new GetSessionMethodHandler(sessionCache, new SessionIdGenerator());
+						writeResponse(exchange, getHandler.perform(path));
+					} else if (path.endsWith("highstakes")) {
+						GetHighStakesMethodHandler highStakesHandler = new GetHighStakesMethodHandler(betRepo);
+						writeResponse(exchange, highStakesHandler.perform(path));
+					} else {
+						throw new HttpStatusCodeException(HttpURLConnection.HTTP_NOT_FOUND, "Path: " + path + " is not a known endpoint.");
+					}
 				} else if ("POST".equals(method)) {
+					// handle paths of pattern: /<betofferid>/stake
+					// query should be ?sessionkey=<sessionkey>
+					
+					if (! path.endsWith("stake")) {
+						throw new HttpStatusCodeException(HttpURLConnection.HTTP_NOT_FOUND, "Path: " + path + " is not a known endpoint.");
+					}
+					
 					PostBetOfferMethodHandler postHandler = new PostBetOfferMethodHandler(sessionCache, betRepo);
-					postHandler.perform(exchange.getRequestURI().getPath(), exchange.getRequestURI().getQuery(), is);
+					postHandler.perform(path, exchange.getRequestURI().getQuery(), is);
 
 					exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
 				} else {
 					exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
 				}
 			} catch (HttpStatusCodeException e) {
+				log.error("handle - HTTP status code exception: " + e.getMessage(), e);
 				handleException(exchange, e.getStatusCode(), e.getMessage());				
 			} catch (Exception e) {
+				log.error("handle - unexpected internal server exception: " + e.getMessage(), e);
 				handleException(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, "Internal server error - cause: " + e.getMessage());
 			}
 		} 
 	}
 
 	private void writeResponse(HttpExchange exchange, String response) throws IOException {
+		log.debug("writeResponse - returning status OK and response: " + response);
 		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length());
 		exchange.getResponseBody().write(response.getBytes());
 	}
