@@ -64,8 +64,7 @@ public class MockHttpExchange extends HttpExchange {
 	
 	@Override
 	public Headers getResponseHeaders() {
-		// TODO Auto-generated method stub
-		return null;
+		return new Headers();
 	}
 	
 	@Override

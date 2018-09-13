@@ -36,6 +36,7 @@ public class DispatchHandler implements HttpHandler {
 	public void handle(HttpExchange exchange) throws IOException {
 		// called each time on a separate thread
 		
+		// FIXME - this is added for the index.html JS testing script to allow browsers to read the data
 		exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
 		
 		try (InputStream is = exchange.getRequestBody();
