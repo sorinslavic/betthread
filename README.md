@@ -55,4 +55,5 @@ I avoided using a mocking framework (EasyMock / Mockito) - and built my own "moc
 For the statefull singletons - BetRepository, SessionCache - i was forced to add a "clear" method inside them that i used to "clear" the data from the map. FIXME - might change
 
 # JS Client
-Add an index.html page and some jQuery JS that will execute parallel GET/POST requests on the server.
+I adde an index.html page in the src/test/resources folder and some jQuery JS that will execute parallel GET/POST requests on the server.
+It's just an easy UI opened from any browser to validate that - if the server is up and running - it will receive and respond to requests.
