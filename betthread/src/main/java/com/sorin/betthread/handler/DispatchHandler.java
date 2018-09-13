@@ -36,6 +36,8 @@ public class DispatchHandler implements HttpHandler {
 	public void handle(HttpExchange exchange) throws IOException {
 		// called each time on a separate thread
 		
+		exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+		
 		try (InputStream is = exchange.getRequestBody();
 				OutputStream os = exchange.getResponseBody()) {
 			

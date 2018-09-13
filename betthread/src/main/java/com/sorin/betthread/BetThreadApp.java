@@ -17,11 +17,11 @@ import com.sun.net.httpserver.HttpServer;
  * </br></br>
  * To start the application we can run:</br>
  * <code>
- * java -jar betthread -port=8001 -numOfThreads=4 -timeoutMinutes=3 
+ * java -jar betthread.jar -port=8001 -numOfThreads=4 -timeoutMinutes=3 
  * </code>
  * </br></br>
  * The defaults noted in {@link Environment} will be used if arguments are not set</br>
- * <code>java -jar betthread</code>
+ * <code>java -jar betthread.jar</code>
  * 
  * @author Sorin.Slavic
  *
@@ -32,9 +32,9 @@ public class BetThreadApp {
 	public static final Charset CHARSET = Charset.forName("US-ASCII");
 	
 	public static void main(String[] args) throws Exception {
-		log.info("main - starting web app on port 8001");
-		
 		Environment.load(args);
+
+		log.info("main - starting web app on port " + Environment.getEnv().getPort());
 		
 		InetSocketAddress socket = new InetSocketAddress("localhost", Environment.getEnv().getPort());
 		HttpServer server = HttpServer.create(socket, 0);
@@ -45,6 +45,7 @@ public class BetThreadApp {
 		server.createContext("/", new DispatchHandler(ConcurrentSessionCache.getInstance(), InMemoryBetRepository.getInstance()));
 		
 		server.start();
+		log.info("main - server started - awaiting requests ...");
 	}
 
 }

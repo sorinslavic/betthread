@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>BetThread test - a JS client</title>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+</head>
+<body>
+	<header class="jumbotron text-center">
+		<h3>BetThread test - a JS client</h3>
+		<h4>Port: <input class="input" type="text" name="port" value="8001"/></h4>
+	</header>
+
+	<main role="main">
+		<div class="container">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					Try to load access incorrect url:
+					<button type="button" class="btn btn-default" onclick="get404Error()">404</button>
+					<button type="button" class="btn btn-default" onclick="get403Error()">403</button>
+					<button type="button" class="btn btn-default" onclick="get500Error()">500</button>
+					<button type="button" class="btn btn-default" onclick="javascript: $('#errors').html('')">Clear</button>
+				</div>				
+				<div class="panel-body" id="errors" style="min-height: 150px; max-height: 150px; overflow-y: scroll;"></div>
+			</div>
+						
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					Create a new session for each customer:
+					<button type="button" class="btn btn-default" onclick="initSessions()">Init sessions</button>
+					<button type="button" class="btn btn-default" onclick="javascript: $('#generated-sessions').html('')">Clear</button>
+				</div>				
+				<div class="panel-body" id="generated-sessions" style="min-height: 250px; max-height: 250px; overflow-y: scroll;"></div>
+			</div>
+			
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					Place all bets for all customers:
+					<button type="button" class="btn btn-default" onclick="placeBets()">Place bets</button>
+					<button type="button" class="btn btn-default" onclick="javascript: $('#placed-bets').html('')">Clear</button>
+				</div>				
+				<div class="panel-body" id="placed-bets" style="min-height: 250px; max-height: 250px; overflow-y: scroll;"></div>
+			</div>
+			
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					Get top stakes for each bet offer:
+					<button type="button" class="btn btn-default" onclick="getTopStakes()">Get top stakes</button>
+					<button type="button" class="btn btn-default" onclick="javascript: $('#top-stakes').html('')">Clear</button>
+				</div>				
+				<div class="panel-body" id="top-stakes" style="min-height: 250px; max-height: 250px; overflow-y: scroll;"></div>
+			</div>
+		</div>
+	</main>
+
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		
+	<script>
+
+// 	var customers = [1];
+// 	var betOfferIds = [2];
+// 	var stakes = [3];
+
+	var customers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 123, 234, 345, 456, 567, 678, 789, 999, 888, 777, 666, 555, 444, 333, 222, 111];
+	var betOfferIds = [556, 557, 558, 559, 667, 668, 669, 778, 779, 889];
+	var stakes = [10, 95, 1004, 33, 987, 123];
+	
+
+	var customerSession = {};
+	
+	function get404Error() {
+		var port = $('input[name="port"]').val();
+		
+		$.get('http://localhost:' + port + '/123/session2', function(data, textStatus, jqXHR) {
+			$('#errors').append('success');
+		}).fail(function(jqXHR, textStatus, errorThrown) {
+			appendErrors('#errors', jqXHR, errorThrown);
+		});
+	}
+	
+	function get403Error() {
+		var port = $('input[name="port"]').val();
+		
+		$.post('http://localhost:' + port + '/123/stake?sessionkey=AAA111', '123123', function(data, textStatus, jqXHR) {
+			$('#errors').append('success');
+		}).fail(function(jqXHR, textStatus, errorThrown) {
+			appendErrors('#errors', jqXHR, errorThrown);
+		});
+	}
+
+	function get500Error() {
+		var port = $('input[name="port"]').val();
+		
+		$.get('http://localhost:' + port + '/customerId/session', function(data, textStatus, jqXHR) {
+			$('#errors').append('success');
+		}).fail(function(jqXHR, textStatus, errorThrown) {
+			appendErrors('#errors', jqXHR, errorThrown);
+		});
+		
+		$.get('http://localhost:' + port + '/betOfferId/highstakes', function(data, textStatus, jqXHR) {
+			$('#errors').append('success');
+		}).fail(function(jqXHR, textStatus, errorThrown) {
+			appendErrors('#errors', jqXHR, errorThrown);
+		});
+		
+		$.post('http://localhost:' + port + '/betOfferId/stake?sessionkey=xxxx', '123123', function(data, textStatus, jqXHR) {
+			$('#errors').append('success');
+		}).fail(function(jqXHR, textStatus, errorThrown) {
+			appendErrors('#errors', jqXHR, errorThrown);
+		});
+		
+	}
+	
+	function initSessions() {
+		var port = $('input[name="port"]').val();
+		
+		$.each(customers, function(i, customer) {
+			$.get('http://localhost:' + port + '/' + customer + '/session', function(data, textStatus, jqXHR) {
+				$('#generated-sessions').append('Customer: ' + customer + ' / session: ' + data + '</br>');
+				customerSession[customer] = data;
+			}).fail(function(jqXHR, textStatus, errorThrown) {
+				appendErrors('#generated-sessions', jqXHR, errorThrown);
+			});
+		});
+	}
+	
+	function placeBets() {
+		var port = $('input[name="port"]').val();
+		
+		$.each(stakes, function(i, stake) {
+			$.each(customers, function(j, customer) {
+				$.each(betOfferIds, function(k, betOfferId) {
+					var placedStake = '' + ((customer*stake)+betOfferId);
+					$.post('http://localhost:' + port + '/' + betOfferId + '/stake?sessionkey=' 
+							+ customerSession[customer], placedStake, function(data, textStatus, jqXHR) {
+						$('#placed-bets').append('BetOfferId: ' + betOfferId + ' / Customer: ' + customer + " placed stake: " + placedStake + '</br>');
+					}).fail(function(jqXHR, textStatus, errorThrown) {
+						appendErrors('#placed-bets', jqXHR, errorThrown);
+					});
+				});
+			});
+		});
+	}
+	
+	function getTopStakes() {
+		var port = $('input[name="port"]').val();
+		
+		$.each(betOfferIds, function(i, betOfferId) {
+			$.get('http://localhost:' + port + '/' + betOfferId + '/highstakes', function(data, textStatus, jqXHR) {
+				$('#top-stakes').append('BetOfferId: ' + betOfferId + ' - csv: ' + data + '</br>');
+			}).fail(function(jqXHR, textStatus, errorThrown) {
+				appendErrors('#top-stakes', jqXHR, errorThrown);
+			});
+		});
+	}
+	
+	function appendErrors(parent, jqXHR, errorThrown) {
+		$(parent).append('Error - ' + jqXHR.status + ' ' + errorThrown + ' - ' + jqXHR.responseText + '</br>');
+	}
+	
+	</script>
+</body>
+</html>
