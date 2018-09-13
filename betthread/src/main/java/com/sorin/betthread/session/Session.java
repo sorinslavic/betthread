@@ -1,5 +1,24 @@
 package com.sorin.betthread.session;
 
+/**
+ * Session object representation.
+ * Each session is identified by a sessionId/sessionKey - the customerId it was created for
+ * and the expirationDate.
+ * 
+ * The timeoutMilis is actually an environment constant - but since we allow runtime parameterization for it, it 
+ * will need to be included here. FIXME - not really - the {@link #isValid()} method could get that
+ * timeout as a parameter.
+ * 
+ * The expirationDate is not a final field because each valid session is "refreshed" every time it is used - as to
+ * extend the period it is valid for.
+ * 
+ * The sessionId and sessionKey have a "special" relationship.
+ * The sessionKey is actually the HEX representation of the sessionId long value :)
+ * I believe - not really tested - that this will yield better performance inside the HashMap.
+ * 
+ * @author Sorin.Slavic
+ *
+ */
 public class Session {
 	private final long sessionId;
 	private final String sessionKey;
@@ -33,6 +52,7 @@ public class Session {
 		return timeoutMilis;
 	}
 	
+	// should this be synchronized ? FIXME
 	public void updateExpiration() {
 		this.expirationDate = System.currentTimeMillis() + timeoutMilis;
 	}

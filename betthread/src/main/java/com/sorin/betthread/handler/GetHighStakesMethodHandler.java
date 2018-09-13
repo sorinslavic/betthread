@@ -7,6 +7,12 @@ import com.sorin.betthread.Log;
 import com.sorin.betthread.repository.BetRepository;
 import com.sorin.betthread.repository.CustomerStake;
 
+/**
+ * Retrieve the top 20 highest stakes currently stored in the {@link BetRepository}
+ * for the given betOfferId;
+ * @author Sorin.Slavic
+ *
+ */
 public class GetHighStakesMethodHandler {
 	private static final Log log = new Log(GetHighStakesMethodHandler.class);
 
@@ -25,6 +31,8 @@ public class GetHighStakesMethodHandler {
 		if (stakes == null)
 			return "";
 		
+		// the CustomerStake#toString is equivalent to this - but I do not want to mix internal toString implementations
+		// with the view layer logic - meh - it's the little things
 		return stakes.stream().limit(20).map(cs -> cs.getCustomerId() + "=" + cs.getStake()).collect(Collectors.joining(","));
 	}
 

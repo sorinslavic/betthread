@@ -1,5 +1,14 @@
 package com.sorin.betthread.repository;
 
+/**
+ * Simple immutable POJO for a Customer Stake record;
+ * 
+ * {@link Comparable} implementation assures this object is used correctly and that we can sort
+ * automatically any collection of CustomerStake.
+ * 
+ * @author Sorin.Slavic
+ *
+ */
 public class CustomerStake implements Comparable<CustomerStake> {
 	private final int customerId;
 	private final int stake;

@@ -13,6 +13,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sorin.betthread.Environment;
+
 public class ConcurrentSessionCacheTestCase {
 	// must be HEX int representation 
 	private static final String SESSION_KEY = "123ABC";
@@ -85,7 +87,8 @@ public class ConcurrentSessionCacheTestCase {
 	}
 	
 	private void createSessionWithId(SessionIdGenerator generator, long id) throws InvalidSessionKeyException {
-		Session session = cache.createSession(generator, CUSTOMER_ID);
+		Environment.load(new String[] {});
+		Session session = cache.createSession(generator, CUSTOMER_ID, Environment.getEnv());
 		
 		assertEquals(id, session.getSessionId());
 		assertEquals(CUSTOMER_ID, session.getCustomerId());

@@ -16,6 +16,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * <p>We are following that advice and will be using ThreadLocalRandom.</p>
  * 
  * FIXME - is {@link UUID#randomUUID()} to powerfull ? do we need more "unique" session ids ?
+ * 
+ * FIXME - {@link Session} and {@link SessionIdGenerator} aren't all that well separate. Both are aware
+ * of the fact that we generate LONG values and then convert to HEX.
  * @author Sorin.Slavic
  *
  */

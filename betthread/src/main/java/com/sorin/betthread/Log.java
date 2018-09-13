@@ -4,9 +4,16 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
 
+/**
+ * Silly logging class that will print log messages to the system.out; </br>
+ * The format of the messages are:</br>
+ * <code>year-month-day hour:minute:second.mili THREAD-NAME [LEVEL] package.and.class.name # log-message</code>
+ * @author Sorin.Slavic
+ *
+ */
 public class Log {
 
-	private static final String FORMAT = "%tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS.%1$tL %2$s\t - [%3$s] %4$s: %5$s"; 
+	private static final String FORMAT = "%tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS.%1$tL %2$s\t - [%3$s] %4$s#%5$s"; 
 	
 	private final Class<?> clazz;
 	

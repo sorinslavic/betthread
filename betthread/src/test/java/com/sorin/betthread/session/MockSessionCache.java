@@ -3,6 +3,8 @@ package com.sorin.betthread.session;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sorin.betthread.Environment;
+
 public class MockSessionCache implements SessionCache {
 	public static int SESSION_ID = 1;
 	public static int CUSTOMER_ID = 2;
@@ -17,7 +19,7 @@ public class MockSessionCache implements SessionCache {
 	}
 
 	@Override
-	public Session createSession(SessionIdGenerator generator, int customerId) {
+	public Session createSession(SessionIdGenerator generator, int customerId, Environment env) {
 		return session;
 	}
 

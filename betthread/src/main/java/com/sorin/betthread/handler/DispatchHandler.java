@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 
+import com.sorin.betthread.Environment;
 import com.sorin.betthread.Log;
 import com.sorin.betthread.repository.BetRepository;
 import com.sorin.betthread.session.SessionCache;
@@ -29,10 +30,11 @@ public class DispatchHandler implements HttpHandler {
 		this.betRepo = betRepo;
 	}
 	
+	// TODO - maybe move the handlers to be initialized in the constructor as to be reused
+	
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 		// called each time on a separate thread
-		// the SessionIdGenerator is "thread dependent"
 		
 		try (InputStream is = exchange.getRequestBody();
 				OutputStream os = exchange.getResponseBody()) {
@@ -52,7 +54,7 @@ public class DispatchHandler implements HttpHandler {
 						// because of how the SessionIdGenerator is implemented we are "forced" to create a new one 
 						// for each exchange - because the SessionIdGenerator needs to be created on the thread it is used
 						// because of the ThreadLocal optimization
-						GetSessionMethodHandler getHandler = new GetSessionMethodHandler(sessionCache, new SessionIdGenerator());
+						GetSessionMethodHandler getHandler = new GetSessionMethodHandler(sessionCache, new SessionIdGenerator(), Environment.getEnv());
 						writeResponse(exchange, getHandler.perform(path));
 					} else if (path.endsWith("highstakes")) {
 						GetHighStakesMethodHandler highStakesHandler = new GetHighStakesMethodHandler(betRepo);

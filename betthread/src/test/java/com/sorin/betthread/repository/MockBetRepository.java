@@ -20,11 +20,6 @@ public class MockBetRepository implements BetRepository {
 		capturedBetOfferIds.add(betOfferId);
 		return stakes;
 	}
-
-	@Override
-	public void clear() {
-		// no need
-	}
 	
 	public void initStakes(SortedSet<CustomerStake> stakes) {
 		this.stakes = stakes;
